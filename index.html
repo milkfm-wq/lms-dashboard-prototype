@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LMS Dashboard Prototype v01</title>
+  <style>
+    :root {
+      --bg: #f3f5f9;
+      --panel: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #dbe1ea;
+      --primary: #0f766e;
+      --danger: #b91c1c;
+      --risk: #dc2626;
+      --ok: #16a34a;
+      --warn: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 0% 0%, #e8eefb 0%, transparent 35%), var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    }
+    .wrap { max-width: 1400px; margin: 20px auto; padding: 0 16px 24px; }
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 10px;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      margin-bottom: 14px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+      position: sticky;
+      top: 10px;
+      z-index: 9;
+    }
+    .title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .control {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--text);
+      font-size: 13px;
+    }
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 9px 12px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--primary);
+    }
+    .btn.gray { background: #475569; }
+    .btn.red { background: var(--danger); }
+    .grid-kpi {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(220px, 1fr));
+      margin-bottom: 12px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+      overflow: hidden;
+    }
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+    }
+    .bid {
+      font-weight: 700;
+      font-size: 12px;
+      color: #0c4a6e;
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      border-radius: 999px;
+      padding: 2px 8px;
+      margin-right: 8px;
+    }
+    .h {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .panel-body { padding: 14px; }
+    .kpi-value { font-size: 34px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+    .kpi-sub { color: var(--muted); font-size: 13px; }
+    .risk { color: var(--risk); }
+    .ok { color: var(--ok); }
+    .warn { color: var(--warn); }
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .chart-box {
+      height: 220px;
+      border: 1px dashed #c8d3e0;
+      border-radius: 10px;
+      background:
+        linear-gradient(180deg, rgba(15,118,110,0.06), transparent 70%),
+        repeating-linear-gradient(0deg, #f8fafc, #f8fafc 24px, #eef2f7 24px, #eef2f7 25px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 12px;
+    }
+    .main {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 2fr 1fr;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border-bottom: 1px solid #edf1f6; text-align: left; padding: 8px; }
+    th { color: #334155; background: #fbfdff; position: sticky; top: 0; }
+    .tag {
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid;
+      display: inline-block;
+    }
+    .tag-risk { color: #991b1b; border-color: #fecaca; background: #fef2f2; }
+    .tag-ok { color: #166534; border-color: #bbf7d0; background: #f0fdf4; }
+    .feedback {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 8px;
+    }
+    .feedback label { font-size: 12px; color: #334155; font-weight: 600; }
+    .feedback input, .feedback textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      background: #fff;
+    }
+    .feedback textarea { min-height: 64px; resize: vertical; }
+    .small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    @media (max-width: 1100px) {
+      .grid-kpi { grid-template-columns: 1fr 1fr; }
+      .charts { grid-template-columns: 1fr; }
+      .main { grid-template-columns: 1fr; }
+      .topbar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="title">LMS Dashboard Prototype <span id="iter-label">v01</span></div>
+        <div class="meta">Mock-up без БД. Фидбек сохраняется локально в браузере.</div>
+      </div>
+      <div class="control" id="build-label" aria-label="Build label">build: v01</div>
+      <button class="btn" id="export-json">Export JSON</button>
+      <button class="btn gray" id="export-md">Export Markdown</button>
+    </div>
+
+    <div class="panel" style="margin-bottom:12px;">
+      <div class="panel-body" style="display:grid; grid-template-columns:repeat(3,minmax(180px,1fr)); gap:10px;">
+        <div>
+          <div class="small">Поток</div>
+          <div style="font-weight:700;">Поток #11 — Весна 2026</div>
+        </div>
+        <div>
+          <div class="small">Период</div>
+          <div style="font-weight:700;">30 дней</div>
+        </div>
+        <div>
+          <div class="small">Последнее обновление</div>
+          <div style="font-weight:700;">2026-03-30 10:35</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-kpi">
+      <section class="panel" data-block-id="M1">
+        <div class="panel-head"><div><span class="bid">M1</span><span class="h">Общий прогресс группы</span></div></div>
+        <div class="panel-body">
+          <div class="kpi-value">68.4%</div>
+          <div class="kpi-sub">+2.3 п.п. к прошлой неделе</div>
+          <div class="feedback">
+            <label>Вопрос к наставнику</label>
+            <input data-field="question" placeholder="Например: формула метрики подходит?" />
+            <label>Комментарий наставника</label>
+            <textarea data-field="comment" placeholder="Ответ/правка по блоку M1"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" data-block-id="M2">
+        <div class="panel-head"><div><span class="bid">M2</span><span class="h">Средний рейтинг</span></div></div>
+        <div class="panel-body">
+          <div class="kpi-value">72.1</div>
+          <div class="kpi-sub ok">Тренд: рост</div>
+          <div class="feedback">
+            <label>Вопрос к наставнику</label>
+            <input data-field="question" placeholder="Что считать рейтингом?" />
+            <label>Комментарий наставника</label>
+            <textarea data-field="comment" placeholder="Ответ/правка по блоку M2"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" data-block-id="M3">
+        <div class="panel-head"><div><span class="bid">M3</span><span class="h">В зоне риска</span></div></div>
+        <div class="panel-body">
+          <div class="kpi-value risk">4</div>
+          <div class="kpi-sub">21% активных участников</div>
+          <div class="feedback">
+            <label>Вопрос к наставнику</label>
+            <input data-field="question" placeholder="Какие пороги для risk?" />
+            <label>Комментарий наставника</label>
+            <textarea data-field="comment" placeholder="Ответ/правка по блоку M3"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" data-block-id="M4">
+        <div class="panel-head"><div><span class="bid">M4</span><span class="h">Лидеры недели</span></div></div>
+        <div class="panel-body">
+          <div class="kpi-value ok">3</div>
+          <div class="kpi-sub">Иван, Мария, Олег</div>
+          <div class="feedback">
+            <label>Вопрос к наставнику</label>
+            <input data-field="question" placeholder="Как назначаются лидеры?" />
+            <label>Комментарий наставника</label>
+            <textarea data-field="comment" placeholder="Ответ/правка по блоку M4"></textarea>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="charts">
+      <section class="panel" data-block-id="C1">
+        <div class="panel-head"><div><span class="bid">C1</span><span class="h">Динамика прогресса группы</span></div></div>
+        <div class="panel-body">
+          <div class="chart-box">Mock-график C1 (line chart по неделям)</div>
+          <div class="feedback">
+            <label>Вопрос к наставнику</label>
+            <input data-field="question" placeholder="Какой период по умолчанию для C1?" />
+            <label>Комментарий наставника</label>
+            <textarea data-field="comment" placeholder="Ответ/правка по блоку C1"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" data-block-id="C2">
+        <div class="panel-head"><div><span class="bid">C2</span><span class="h">Дисциплина по неделям</span></div></div>
+        <div class="panel-body">
+          <div class="chart-box">Mock-график C2 (bar chart по дисциплине/нарушениям)</div>
+          <div class="feedback">
+            <label>Вопрос к наставнику</label>
+            <input data-field="question" placeholder="Показывать индекс или count нарушений?" />
+            <label>Комментарий наставника</label>
+            <textarea data-field="comment" placeholder="Ответ/правка по блоку C2"></textarea>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="main">
+      <section class="panel" data-block-id="T1">
+        <div class="panel-head"><div><span class="bid">T1</span><span class="h">Таблица участников</span></div></div>
+        <div class="panel-body" style="max-height:420px; overflow:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Ученик</th><th>Проект</th><th>Прогресс</th><th>Рейтинг</th><th>Дисциплина</th><th>Риск</th><th>Лидер</th><th>Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Иван Петров</td><td>Market X</td><td>71%</td><td>79</td><td>84</td><td><span class="tag tag-ok">normal</span></td><td>yes</td><td>active</td></tr>
+              <tr><td>Мария Орлова</td><td>Edu Bot</td><td>67%</td><td>74</td><td>76</td><td><span class="tag tag-ok">normal</span></td><td>yes</td><td>active</td></tr>
+              <tr><td>Олег Сидоров</td><td>CRM Lite</td><td>62%</td><td>70</td><td>72</td><td><span class="tag tag-risk">risk</span></td><td>no</td><td>active</td></tr>
+              <tr><td>Анна Ким</td><td>Beauty App</td><td>55%</td><td>63</td><td>60</td><td><span class="tag tag-risk">risk</span></td><td>no</td><td>active</td></tr>
+            </tbody>
+          </table>
+          <div class="feedback">
+            <label>Вопрос к наставнику</label>
+            <input data-field="question" placeholder="Какие колонки обязательны в T1?" />
+            <label>Комментарий наставника</label>
+            <textarea data-field="comment" placeholder="Ответ/правка по блоку T1"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" data-block-id="S1">
+        <div class="panel-head"><div><span class="bid">S1</span><span class="h">Карточка ученика</span></div></div>
+        <div class="panel-body">
+          <div><strong>Иван Петров</strong></div>
+          <div class="small">Проект: Market X</div>
+          <hr style="border:none;border-top:1px solid var(--line);margin:12px 0;" />
+          <div>Точка A: 0 клиентов</div>
+          <div>Точка B: 20 клиентов/мес</div>
+          <div>Прогресс: <strong>71%</strong></div>
+          <div>Рейтинг: <strong>79</strong></div>
+          <div>Открытых задач: <strong>2</strong></div>
+          <div>Неоплаченные штрафы: <strong>3 500</strong></div>
+          <div class="feedback">
+            <label>Вопрос к наставнику</label>
+            <input data-field="question" placeholder="Что добавить/убрать в S1?" />
+            <label>Комментарий наставника</label>
+            <textarea data-field="comment" placeholder="Ответ/правка по блоку S1"></textarea>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel" data-block-id="G1" style="margin-top:12px;">
+      <div class="panel-head"><div><span class="bid">G1</span><span class="h">Общие пожелания по странице</span></div></div>
+      <div class="panel-body">
+        <div class="small">Здесь наставник может оставить комментарий, который относится ко всему прототипу, а не к отдельному блоку.</div>
+        <div class="feedback">
+          <label>Общий комментарий</label>
+          <textarea id="global-comment" data-field="globalComment" placeholder="Любые дополнительные пожелания по структуре, блокам, визуалу и логике..."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <div class="panel" style="margin-top:12px;">
+      <div class="panel-body" style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn" id="save-now">Save Local</button>
+        <button class="btn red" id="reset-all">Reset All Feedback</button>
+        <span class="small"><strong>Порядок действий:</strong> 1) сначала <code>Save Local</code>, 2) затем <code>Export JSON</code>, 3) затем <code>Export Markdown</code>.</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "lms_dashboard_feedback_v1_clean";
+    const iterLabel = document.getElementById("iter-label");
+    const blocks = Array.from(document.querySelectorAll("[data-block-id]"));
+    const globalCommentEl = document.getElementById("global-comment");
+
+    function todayString() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    const BUILD_VERSION = "v01";
+
+    function nowStamp() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      const ss = String(d.getSeconds()).padStart(2, "0");
+      return `${y}-${m}-${day}_${hh}-${mm}-${ss}`;
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { feedback: {}, globalComment: "" };
+        const parsed = JSON.parse(raw);
+        return {
+          feedback: parsed.feedback || {},
+          globalComment: parsed.globalComment || "",
+        };
+      } catch {
+        return { feedback: {}, globalComment: "" };
+      }
+    }
+
+    function saveState(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function collectState() {
+      const feedback = {};
+      for (const block of blocks) {
+        const id = block.getAttribute("data-block-id");
+        if (id === "G1") continue;
+        const question = block.querySelector("[data-field='question']")?.value?.trim() || "";
+        const comment = block.querySelector("[data-field='comment']")?.value?.trim() || "";
+        feedback[id] = { question, comment };
+      }
+      return {
+        iteration: BUILD_VERSION,
+        updatedAt: new Date().toISOString(),
+        feedback,
+        globalComment: globalCommentEl?.value?.trim() || "",
+      };
+    }
+
+    function applyState(state) {
+      iterLabel.textContent = BUILD_VERSION;
+      for (const block of blocks) {
+        const id = block.getAttribute("data-block-id");
+        if (id === "G1") continue;
+        const row = state.feedback?.[id] || {};
+        const q = block.querySelector("[data-field='question']");
+        const c = block.querySelector("[data-field='comment']");
+        if (q) q.value = row.question || "";
+        if (c) c.value = row.comment || "";
+      }
+      if (globalCommentEl) {
+        globalCommentEl.value = state.globalComment || "";
+      }
+    }
+
+    function triggerDownload(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function buildMarkdown(state) {
+      const lines = [];
+      lines.push(`# Dashboard Feedback ${state.iteration}`);
+      lines.push("");
+      lines.push(`- Date: ${todayString()}`);
+      lines.push(`- Updated: ${state.updatedAt}`);
+      lines.push(`- Global comment: ${state.globalComment || "—"}`);
+      lines.push("");
+      lines.push("| Block ID | Question | Comment |");
+      lines.push("|---|---|---|");
+      Object.keys(state.feedback).sort().forEach((id) => {
+        if (id === "G1") return;
+        const q = (state.feedback[id].question || "").replace(/\|/g, "\\|");
+        const c = (state.feedback[id].comment || "").replace(/\|/g, "\\|");
+        lines.push(`| ${id} | ${q} | ${c} |`);
+      });
+      return lines.join("\n");
+    }
+
+    function exportJson() {
+      const state = collectState();
+      saveState(state);
+      const file = `dashboard-feedback-${nowStamp()}.json`;
+      triggerDownload(file, JSON.stringify(state, null, 2), "application/json");
+    }
+
+    function exportMarkdown() {
+      const state = collectState();
+      saveState(state);
+      const file = `dashboard-feedback-${nowStamp()}.md`;
+      triggerDownload(file, buildMarkdown(state), "text/markdown");
+    }
+
+    blocks.forEach((block) => {
+      block.querySelectorAll("input, textarea").forEach((el) => {
+        el.addEventListener("change", () => saveState(collectState()));
+      });
+    });
+    if (globalCommentEl) {
+      globalCommentEl.addEventListener("change", () => saveState(collectState()));
+    }
+
+    document.getElementById("save-now").addEventListener("click", () => {
+      saveState(collectState());
+      alert("Сохранено локально в браузере.");
+    });
+
+    document.getElementById("export-json").addEventListener("click", exportJson);
+    document.getElementById("export-md").addEventListener("click", exportMarkdown);
+
+    document.getElementById("reset-all").addEventListener("click", () => {
+      if (!confirm("Удалить все локальные ответы по этому прототипу?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      applyState({ feedback: {}, globalComment: "" });
+    });
+
+    applyState(loadState());
+  </script>
+</body>
+</html>
